@@ -1,10 +1,13 @@
 extends Area2D
 
+signal hit
+
 @export var speed: int = 400  # pixels per second
 var screen_size: Vector2
 
 
 func _ready() -> void:
+	hide()  # hide the player when the game starts
 	screen_size = get_viewport_rect().size
 
 
@@ -22,10 +25,33 @@ func _process(delta: float) -> void:
 	if velocity.length() > 0:
 		velocity = velocity.normalized() * speed
 		$AnimatedSprite2D.play()
-		# NOTE: $ is shorthand for get_node(): get_node("AnimatedSprite2D").play()
+		# NOTE: $ is shorthand for get_node():
+		# get_node("AnimatedSprite2D").play()
 	else:
 		$AnimatedSprite2D.stop()
 
 	position += velocity * delta
 	# prevent the player from leaving the screen
 	position = position.clamp(Vector2.ZERO, screen_size)
+
+	if velocity.x != 0:
+		$AnimatedSprite2D.animation = "walk"
+		$AnimatedSprite2D.flip_v = false
+		$AnimatedSprite2D.flip_h = velocity.x < 0
+	elif velocity.y != 0:
+		$AnimatedSprite2D.animation = "up"
+		$AnimatedSprite2D.flip_v = velocity.y > 0
+
+
+func _on_body_entered(_body: Node2D) -> void:
+	hide()  # player disappears after being hit
+	hit.emit()
+	# disable the player's collision, so that we don't trigger the hit signal
+	# more than once.
+	$CollisionShape2D.set_deferred("disabled", true)
+
+
+func start(pos):
+	position = pos
+	show()
+	$CollisionShape2D.disabled = false
