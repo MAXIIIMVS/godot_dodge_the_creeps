@@ -1,0 +1,31 @@
+extends Area2D
+
+@export var speed: int = 400  # pixels per second
+var screen_size: Vector2
+
+
+func _ready() -> void:
+	screen_size = get_viewport_rect().size
+
+
+func _process(delta: float) -> void:
+	var velocity = Vector2.ZERO  # player's movement vector
+	if Input.is_action_pressed("move_right"):
+		velocity.x += 1
+	if Input.is_action_pressed("move_left"):
+		velocity.x -= 1
+	if Input.is_action_pressed("move_up"):
+		velocity.y -= 1
+	if Input.is_action_pressed("move_down"):
+		velocity.y += 1
+
+	if velocity.length() > 0:
+		velocity = velocity.normalized() * speed
+		$AnimatedSprite2D.play()
+		# NOTE: $ is shorthand for get_node(): get_node("AnimatedSprite2D").play()
+	else:
+		$AnimatedSprite2D.stop()
+
+	position += velocity * delta
+	# prevent the player from leaving the screen
+	position = position.clamp(Vector2.ZERO, screen_size)
