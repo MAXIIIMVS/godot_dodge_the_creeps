@@ -51,7 +51,7 @@ func _on_body_entered(_body: Node2D) -> void:
 	$CollisionShape2D.set_deferred("disabled", true)
 
 
-func start(pos):
+func start(pos: Vector2):
 	position = pos
 	show()
 	$CollisionShape2D.disabled = false
